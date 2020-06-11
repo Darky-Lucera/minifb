@@ -46,9 +46,10 @@ jobs:
 script:
   - mkdir build
   - cd build
-  - @echo "---------"
-  - @echo "Config..."
-  - @echo "---------"
+  - echo off
+  - echo "---------"
+  - echo "Config..."
+  - echo "---------"
   - if [ $TRAVIS_OS_NAME = 'osx' ]; then
       if test -n "${USE_IOS}"; then
         cmake .. -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 ;
@@ -64,9 +65,9 @@ script:
         cmake ..;
       fi
     fi
-  - @echo "--------"
-  - @echo "Build..."
-  - @echo "--------"
+  - echo "--------"
+  - echo "Build..."
+  - echo "--------"
   - if test -n "${USE_IOS}"; then
       cmake --build . --target minifb ;
     else

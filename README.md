@@ -1,5 +1,5 @@
 # Status
-X11: [![Build Status](https://travis-ci.org/Darky-Lucera/minifb.svg?branch=master)](https://travis-ci.org/Darky-Lucera/minifb)
+[![Build Status](https://travis-ci.org/Darky-Lucera/minifb.svg?branch=master)](https://travis-ci.org/Darky-Lucera/minifb)
 
 
 # MiniFB

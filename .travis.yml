@@ -1,10 +1,5 @@
 language: cpp
 
-os:
-  - linux
-  - osx
-  - windows
-
 jobs:
   include:
     - os: linux
@@ -39,9 +34,15 @@ jobs:
         - USE_IOS=ON
 
     - os: windows
-      name: "Windows"
+      name: "Windows Visual Studio"
       env:
         - USE_WINDOWS=ON
+
+    - os: windows
+      name: "Windows MinGW"
+      env:
+        - USE_WINDOWS=ON
+        - USE_MINGW=ON
 
 script:
   - mkdir build
@@ -58,9 +59,15 @@ script:
       else
         cmake ..;
       fi
-    else
+    elif [ $TRAVIS_OS_NAME = 'linux' ]; then
       if test -n "${USE_WAYLAND}"; then
         cmake .. -DUSE_WAYLAND=ON;
+      else
+        cmake ..;
+      fi
+    else
+      if test -n "${USE_MINGW}"; then
+        cmake .. -G "MinGW Makefiles";
       else
         cmake ..;
       fi

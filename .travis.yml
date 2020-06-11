@@ -10,10 +10,24 @@ matrix:
             apt:
                 packages:
                     - libx11-dev
+      - os: linux
+        dist: bionic
+        sudo: false
+        name: "Linux Wayland"
+        addons:
+            apt:
+                packages:
+                    - libwayland-dev
+        env:
+          - USE_WAYLAND=ON
 
 script:
   - mkdir build
   - cd build
-  - cmake ..
+  - if test -n "${USE_WAYLAND}"; then
+  -   cmake .. -DUSE_WAYLAND=ON
+  - else
+  -   cmake ..
+  - fi
   - cmake --build .
   

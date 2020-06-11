@@ -43,7 +43,7 @@ script:
   - cd build
   - if [ $TRAVIS_OS_NAME = 'osx' ]; then
       if test -n "${USE_IOS}"; then
-        cmake .. -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 --target minifb ;
+        cmake .. -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 ;
       elif test -n "${USE_METAL_API}"; then
         cmake .. -USE_METAL_API=ON;
       else
@@ -56,5 +56,8 @@ script:
         cmake ..;
       fi
     fi
-  - cmake --build .
-  
+    - if test -n "${USE_IOS}"; then
+        cmake --build . --target minifb ;
+      else
+        cmake --build . ;
+      fi

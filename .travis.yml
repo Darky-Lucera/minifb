@@ -34,7 +34,7 @@ jobs:
 
       - os: osx
         sudo: false
-        name: "MacOS X Metal"
+        name: "MacOS iOS"
         env:
           - USE_IOS=ON
 
@@ -43,7 +43,7 @@ script:
   - cd build
   - if [ $TRAVIS_OS_NAME = 'osx' ]; then
       if test -n "${USE_IOS}"; then
-        cmake .. -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 ;
+        cmake .. -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 --target minifb ;
       elif test -n "${USE_METAL_API}"; then
         cmake .. -USE_METAL_API=ON;
       else

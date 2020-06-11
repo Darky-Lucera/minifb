@@ -1,11 +1,10 @@
 language: cpp
 
-matrix:
+jobs:
     include:
       - os: linux
         sudo: false
         dist: bionic
-        sudo: false
         name: "Linux X11"
         addons:
             apt:
@@ -15,7 +14,6 @@ matrix:
       - os: linux
         sudo: false
         dist: bionic
-        sudo: false
         name: "Linux Wayland"
         addons:
             apt:
@@ -34,11 +32,19 @@ matrix:
         env:
           - USE_METAL_API=ON
 
+      - os: osx
+        sudo: false
+        name: "MacOS X Metal"
+        env:
+          - USE_IOS=ON
+
 script:
   - mkdir build
   - cd build
   - if [ $TRAVIS_OS_NAME = 'osx' ]; then
-      if test -n "${USE_METAL_API}"; then
+      if test -n "${USE_IOS}"; then
+        cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 ..
+      elif test -n "${USE_METAL_API}"; then
         cmake .. -USE_METAL_API=ON;
       else
         cmake ..;

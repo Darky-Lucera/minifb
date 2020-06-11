@@ -10,6 +10,7 @@ matrix:
             apt:
                 packages:
                     - libx11-dev
+
       - os: linux
         dist: bionic
         sudo: false
@@ -25,9 +26,9 @@ script:
   - mkdir build
   - cd build
   - if test -n "${USE_WAYLAND}"; then
-      cmake .. -DUSE_WAYLAND=ON
+      cmake .. -DUSE_WAYLAND=ON;
     else
-      cmake ..
+      cmake ..;
     fi
   - cmake --build .
   

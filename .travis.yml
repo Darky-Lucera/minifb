@@ -1,47 +1,47 @@
 language: cpp
 
+os:
+  - linux
+  - osx
+  - windows
+
 jobs:
-    include:
-      - os: linux
-        sudo: false
-        dist: bionic
-        name: "Linux X11"
-        addons:
-            apt:
-                packages:
-                    - libx11-dev
+  include:
+    - os: linux
+      dist: bionic
+      name: "Linux X11"
+      addons:
+          apt:
+              packages:
+                  - libx11-dev
 
-      - os: linux
-        sudo: false
-        dist: bionic
-        name: "Linux Wayland"
-        addons:
-            apt:
-                packages:
-                    - libwayland-dev
-        env:
-          - USE_WAYLAND=ON
+    - os: linux
+      dist: bionic
+      name: "Linux Wayland"
+      addons:
+          apt:
+              packages:
+                  - libwayland-dev
+      env:
+        - USE_WAYLAND=ON
 
-      - os: osx
-        sudo: false
-        name: "MacOS X Cocoa"
+    - os: osx
+      name: "MacOS X Cocoa"
 
-      - os: osx
-        sudo: false
-        name: "MacOS X Metal"
-        env:
-          - USE_METAL_API=ON
+    - os: osx
+      name: "MacOS X Metal"
+      env:
+        - USE_METAL_API=ON
 
-      - os: osx
-        sudo: false
-        name: "MacOS iOS"
-        env:
-          - USE_IOS=ON
+    - os: osx
+      name: "MacOS iOS"
+      env:
+        - USE_IOS=ON
 
-      - os: windows
-        name: "Windows"
-        env:
-          - USE_WINDOWS=ON
+    - os: windows
+      name: "Windows"
+      env:
+        - USE_WINDOWS=ON
 
 script:
   - mkdir build

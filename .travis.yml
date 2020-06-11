@@ -38,12 +38,6 @@ jobs:
       env:
         - USE_WINDOWS=ON
 
-    - os: windows
-      name: "Windows MinGW"
-      env:
-        - USE_WINDOWS=ON
-        - USE_MINGW=ON
-
 script:
   - mkdir build
   - cd build
@@ -66,11 +60,7 @@ script:
         cmake ..;
       fi
     else
-      if test -n "${USE_MINGW}"; then
-        cmake .. -G "MinGW Makefiles";
-      else
-        cmake ..;
-      fi
+      cmake ..;
     fi
   - echo "--------"
   - echo "Build..."

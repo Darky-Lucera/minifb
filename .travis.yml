@@ -1,0 +1,19 @@
+language: cpp
+
+matrix:
+    include:
+      - os: linux
+        dist: bionic
+        sudo: false
+        name: "Linux X11"
+        addons:
+            apt:
+                packages:
+                    - libx11-dev
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - cmake --build .
+  

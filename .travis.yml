@@ -25,9 +25,9 @@ script:
   - mkdir build
   - cd build
   - if test -n "${USE_WAYLAND}"; then
-  -   cmake .. -DUSE_WAYLAND=ON
-  - else
-  -   cmake ..
-  - fi
+      cmake .. -DUSE_WAYLAND=ON
+    else
+      cmake ..
+    fi
   - cmake --build .
   

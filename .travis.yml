@@ -3,6 +3,7 @@ language: cpp
 matrix:
     include:
       - os: linux
+        sudo: false
         dist: bionic
         sudo: false
         name: "Linux X11"
@@ -12,6 +13,7 @@ matrix:
                     - libx11-dev
 
       - os: linux
+        sudo: false
         dist: bionic
         sudo: false
         name: "Linux Wayland"
@@ -22,13 +24,31 @@ matrix:
         env:
           - USE_WAYLAND=ON
 
+      - os: osx
+        sudo: false
+        name: "MacOS X Cocoa"
+
+      - os: osx
+        sudo: false
+        name: "MacOS X Metal"
+        env:
+          - USE_METAL_API=ON
+
 script:
   - mkdir build
   - cd build
-  - if test -n "${USE_WAYLAND}"; then
-      cmake .. -DUSE_WAYLAND=ON;
+  - if [ $TRAVIS_OS_NAME = 'osx' ]; then
+      if test -n "${USE_METAL_API}"; then
+        cmake .. -USE_METAL_API=ON;
+      else
+        cmake ..;
+      fi
     else
-      cmake ..;
+      if test -n "${USE_WAYLAND}"; then
+        cmake .. -DUSE_WAYLAND=ON;
+      else
+        cmake ..;
+      fi
     fi
   - cmake --build .
   

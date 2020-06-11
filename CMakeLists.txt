@@ -5,6 +5,15 @@ project(${PROJECT_NAME})
 
 message("Processing " ${PROJECT_NAME})
 
+if(NOT DEFINED IOS)
+    if(DEFINED CMAKE_SYSTEM_NAME)
+        string(TOLOWER CMAKE_SYSTEM_NAME CMAKE_SYSTEM_NAME_LOWER)
+        if(CMAKE_SYSTEM_NAME_LOWER STREQUAL "ios")
+            set(IOS true)
+        endif()
+    endif()
+endif()
+
 set(SrcLib
     include/MiniFB.h
     include/MiniFB_cpp.h
@@ -14,6 +23,7 @@ set(SrcLib
     src/MiniFB_cpp.cpp
     src/MiniFB_internal.c
     src/MiniFB_internal.h
+    src/MiniFB_timer.c
     src/WindowData.h
 )
 
@@ -26,19 +36,35 @@ set(SrcMacOSX
     src/macosx/MacMiniFB.m
     src/macosx/OSXWindow.h
     src/macosx/OSXWindow.m
-    src/macosx/OSXWindowFrameView.h
-    src/macosx/OSXWindowFrameView.m
+    src/macosx/OSXView.h
+    src/macosx/OSXView.m
+    src/macosx/OSXViewDelegate.h
+    src/macosx/OSXViewDelegate.m
     src/macosx/WindowData_OSX.h
+)
+
+set(SrcIOS
+    src/ios/WindowData_IOS.h
+    src/ios/iOSMiniFB.m
+    src/ios/iOSView.h
+    src/ios/iOSView.m
+    src/ios/iOSViewController.h
+    src/ios/iOSViewController.m
+    src/ios/iOSViewDelegate.h
+    src/ios/iOSViewDelegate.m
+    include/MiniFB_ios.h
 )
 
 set(SrcWayland
     src/wayland/WaylandMiniFB.c
     src/wayland/WindowData_Way.h
+    src/MiniFB_linux.c
 )
 
 set(SrcX11
     src/x11/X11MiniFB.c
     src/x11/WindowData_X11.h
+    src/MiniFB_linux.c
 )
 
 # Avoid RelWithDebInfo and MinSizeRel
@@ -51,6 +77,12 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
     message(STATUS "Build type not specified: Use Release by default")
 endif(NOT CMAKE_BUILD_TYPE)
+
+# Set features
+#--------------------------------------
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set GCC/Clang flags
 #--------------------------------------
@@ -78,14 +110,13 @@ if (NOT MSVC)
     add_compile_options("$<$<CONFIG:Debug>:-g>")
     add_compile_options("$<IF:$<CONFIG:Debug>,-O0,-O2>")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-switch -Wno-unused-function -Wno-implicit-fallthrough")
-    set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
     set (CMAKE_OBJC_FLAGS "${CMAKE_C_FLAGS}")
     set (CMAKE_OBJCXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 # Set default cmake flags
 #--------------------------------------
-if (APPLE) 
+if (APPLE AND NOT IOS) 
     OPTION(USE_METAL_API "Build the project using metal API code" ON)
 elseif (UNIX)
     OPTION(USE_WAYLAND_API "Build the project using wayland API code" OFF)
@@ -102,26 +133,18 @@ elseif (MINGW)
     add_definitions(-D_WIN32_WINNT=0x0600)
 
     list(APPEND SrcLib ${SrcWindows})
+elseif (IOS)
+    list(APPEND SrcLib ${SrcIOS})
 elseif (APPLE)
     if(USE_METAL_API)
         add_definitions(-DUSE_METAL_API)
     endif()
-    
-    link_libraries("-framework Cocoa")
-    link_libraries("-framework QuartzCore")
-    link_libraries("-framework Metal")
-    link_libraries("-framework MetalKit")
-    
+        
     list(APPEND SrcLib ${SrcMacOSX})
 elseif (UNIX)
     if(USE_WAYLAND_API)
-        link_libraries("-lwayland-client")
-        link_libraries("-lwayland-cursor")
-
         list(APPEND SrcLib ${SrcWayland})
     else()
-        link_libraries("-lX11")
-
         list(APPEND SrcLib ${SrcX11})
     endif()
 endif()
@@ -132,28 +155,78 @@ add_library(minifb STATIC
     ${SrcLib}
 )
 
+#--------------------------------------
+if (APPLE)
+    if(IOS)
+        target_link_libraries(minifb 
+            "-framework UIKit"
+            "-framework QuartzCore"
+            "-framework Metal"
+            "-framework MetalKit"
+        )
+    else()
+        target_link_libraries(minifb
+            "-framework Cocoa"
+            "-framework QuartzCore"
+            "-framework Metal"
+            "-framework MetalKit"
+        )
+    endif()
+elseif (UNIX)
+    if(USE_WAYLAND_API)
+        target_link_libraries(minifb 
+            "-lwayland-client"
+            "-lwayland-cursor"
+        )
+    else()
+        target_link_libraries(minifb 
+            "-lX11"
+        )
+    endif()
+endif()
+
 # For all projects
 #--------------------------------------
-target_include_directories(minifb PUBLIC  include)
+target_include_directories(minifb PUBLIC  ${CMAKE_CURRENT_LIST_DIR}/include)
 target_include_directories(minifb PRIVATE src)
+
 link_libraries(minifb)
 
 # Examples
 #--------------------------------------
-add_executable(noise 
-    tests/noise.c
-)
+if(NOT IOS)
 
-add_executable(input_events 
-    tests/input_events.c
-)
+    add_executable(noise 
+        tests/noise.c
+    )
 
-add_executable(input_events_cpp
-    tests/input_events_cpp.cpp
-)
+    add_executable(input_events 
+        tests/input_events.c
+    )
 
-add_executable(multiple_windows
-    tests/multiple_windows.c
-)
+    add_executable(input_events_cpp
+        tests/input_events_cpp.cpp
+    )
+
+    add_executable(multiple_windows
+        tests/multiple_windows.c
+    )
+    
+else()
+
+    add_executable(noise 
+        tests/ios/main.m
+        tests/ios/AppDelegate.h
+        tests/ios/AppDelegate.m
+    )
+
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Set CMake deployment target" ${FORCE_CACHE})
+
+    target_include_directories(noise PRIVATE src)
+    target_include_directories(noise PRIVATE src/ios)
+
+    add_definitions(-DTVOS_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
+
+endif()
 
 message("Done " ${PROJECT_NAME})
